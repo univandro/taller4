@@ -25,6 +25,16 @@
  */
 class Address extends CActiveRecord
 {
+    
+        public function behaviors(){
+            return array(
+                'CTimestampbehavior' => array(
+                    'class' => 'zii.behaviors.CTimestampbehavior',
+                    'createAttribute' => 'date_created',
+                    'updateAttribute' => 'date_modified',
+                )
+            );
+        }
 	/**
 	 * Returns the static model of the specified AR class.
 	 * @param string $className active record class name.
@@ -51,12 +61,16 @@ class Address extends CActiveRecord
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('id_person, location, zone, city, state, country, date_created, created_by, date_modified, modified_by, is_primary', 'required'),
+			array('id_person, location, zone, city, state, country, is_primary', 'required', 'on'=>'createPerson'),
+			array('location, zone, city, state, country, is_primary', 'required', 'on'=>'updatePerson'),
 			array('id_person, created_by, modified_by, is_primary', 'numerical', 'integerOnly'=>true),
 			array('location, zone, city, state, country, google_map', 'length', 'max'=>145),
 			// The following rule is used by search().
 			// Please remove those attributes that should not be searched.
 			array('id_address, id_person, location, zone, city, state, country, google_map, date_created, created_by, date_modified, modified_by, is_primary', 'safe', 'on'=>'search'),
+                        array('created_by', 'default','value'=>Yii::app()->user->id,'setOnEmpty'=>true,'on'=>'insert,createPerson'),
+                        
+                        array('modified_by', 'default','value'=>Yii::app()->user->id,'setOnEmpty'=>true,'on'=>'updatePerson'),
 		);
 	}
 
