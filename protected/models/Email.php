@@ -46,12 +46,16 @@ class Email extends CActiveRecord
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('id_person, email, date_created, created_by, date_modified, modified_by, is_primary', 'required'),
+			array('id_person, email, is_primary', 'required', 'on'=>'insert'),
+			array('email, is_primary', 'required', 'on'=>'update'),
 			array('id_person, created_by, modified_by, is_primary', 'numerical', 'integerOnly'=>true),
 			array('email', 'length', 'max'=>145),
 			// The following rule is used by search().
 			// Please remove those attributes that should not be searched.
 			array('id_email, id_person, email, date_created, created_by, date_modified, modified_by, is_primary', 'safe', 'on'=>'search'),
+                        array('created_by', 'default','value'=>Yii::app()->user->id_person,'setOnEmpty'=>true,'on'=>'insert'),
+                        array('modified_by', 'default','value'=>Yii::app()->user->id_person,'setOnEmpty'=>true,'on'=>'insert'),
+                        array('modified_by', 'default','value'=>Yii::app()->user->id_person,'setOnEmpty'=>false,'on'=>'update'),
 		);
 	}
 
@@ -76,13 +80,13 @@ class Email extends CActiveRecord
 	{
 		return array(
 			'id_email' => 'Id Email',
-			'id_person' => 'Id Person',
+			'id_person' => 'Persona',
 			'email' => 'Email',
-			'date_created' => 'Date Created',
-			'created_by' => 'Created By',
-			'date_modified' => 'Date Modified',
-			'modified_by' => 'Modified By',
-			'is_primary' => 'Is Primary',
+			'date_created' => 'Fecha de la Creacion',
+			'created_by' => 'Creado Por',
+			'date_modified' => 'Fecha de Modificacion',
+			'modified_by' => 'Modificado Por',
+			'is_primary' => 'Es Principal',
 		);
 	}
 
@@ -110,4 +114,33 @@ class Email extends CActiveRecord
 			'criteria'=>$criteria,
 		));
 	}
+        ///////////////////agregados por mi///////////////
+        
+        
+        public function behaviors(){
+            return array(
+                'CTimestampbehavior' => array(
+                    'class' => 'zii.behaviors.CTimestampBehavior',
+                    'createAttribute' => 'date_created',
+                    'updateAttribute' => 'date_modified',
+                )
+            );
+        }
+        
+        public function getPrimaryTypes()
+        {
+            $types=array(
+                '1'=>'SI',
+                '0'=>'NO',
+            );
+            return empty($this->is_primary)?$types:$types[$this->is_primary];
+        }
+        
+        public function getIsPrimaryTypes($is_primary)
+        {
+            if($is_primary==0)
+                return "NO";
+            else
+                return "SI";
+        }
 }
